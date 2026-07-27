@@ -226,7 +226,7 @@ export function DemandaDetailPage() {
             {demand.titulo}
           </Title>
           <Text c="dimmed" mt={4}>
-            {demand.areaSolicitante} · solicitado por {demand.solicitante} ·{" "}
+            {demand.areaSolicitante} · requested by {demand.solicitante} ·{" "}
             {formatDate(demand.dataSolicitacao)}
           </Text>
         </div>

@@ -17,13 +17,13 @@ export const TipoDemanda = {
 } as const;
 
 export const tipoLabel: Record<number, string> = {
-  [TipoDemanda.ProjetoNovo]: "Projeto novo",
-  [TipoDemanda.MelhoriaSistema]: "Melhoria de sistema",
-  [TipoDemanda.CorrecaoBug]: "Correção (Bug)",
-  [TipoDemanda.Compliance]: "Compliance / Regulatório",
-  [TipoDemanda.Infraestrutura]: "Infraestrutura",
-  [TipoDemanda.Seguranca]: "Segurança da Informação",
-  [TipoDemanda.Automacao]: "Automação / Digitalização",
+  [TipoDemanda.ProjetoNovo]: "New project",
+  [TipoDemanda.MelhoriaSistema]: "System improvement",
+  [TipoDemanda.CorrecaoBug]: "Bug fix",
+  [TipoDemanda.Compliance]: "Compliance / Regulatory",
+  [TipoDemanda.Infraestrutura]: "Infrastructure",
+  [TipoDemanda.Seguranca]: "Information Security",
+  [TipoDemanda.Automacao]: "Automation / Digitalization",
 };
 
 export const Impacto = {
@@ -32,9 +32,9 @@ export const Impacto = {
   Baixo: 506970002,
 } as const;
 export const impactoLabel: Record<number, string> = {
-  [Impacto.Alto]: "Alto",
-  [Impacto.Medio]: "Médio",
-  [Impacto.Baixo]: "Baixo",
+  [Impacto.Alto]: "High",
+  [Impacto.Medio]: "Medium",
+  [Impacto.Baixo]: "Low",
 };
 
 export const TipoImpacto = {
@@ -45,11 +45,11 @@ export const TipoImpacto = {
   ExperienciaCliente: 5,
 } as const;
 export const tipoImpactoLabel: Record<number, string> = {
-  [TipoImpacto.Receita]: "Receita",
-  [TipoImpacto.ReducaoCustos]: "Redução de custos",
-  [TipoImpacto.Eficiencia]: "Eficiência operacional",
-  [TipoImpacto.Risco]: "Risco / compliance",
-  [TipoImpacto.ExperienciaCliente]: "Experiência do cliente",
+  [TipoImpacto.Receita]: "Revenue",
+  [TipoImpacto.ReducaoCustos]: "Cost reduction",
+  [TipoImpacto.Eficiencia]: "Operational efficiency",
+  [TipoImpacto.Risco]: "Risk / compliance",
+  [TipoImpacto.ExperienciaCliente]: "Customer experience",
 };
 
 export const Urgencia = {
@@ -59,10 +59,10 @@ export const Urgencia = {
   Baixo: 506970003,
 } as const;
 export const urgenciaLabel: Record<number, string> = {
-  [Urgencia.Critico]: "Crítico",
-  [Urgencia.Alto]: "Alto",
-  [Urgencia.Medio]: "Médio",
-  [Urgencia.Baixo]: "Baixo",
+  [Urgencia.Critico]: "Critical",
+  [Urgencia.Alto]: "High",
+  [Urgencia.Medio]: "Medium",
+  [Urgencia.Baixo]: "Low",
 };
 
 export const EsforcoEstimado = {
@@ -71,9 +71,9 @@ export const EsforcoEstimado = {
   Grande: 506970002, // 3+ meses
 } as const;
 export const esforcoLabel: Record<number, string> = {
-  [EsforcoEstimado.Pequeno]: "Pequeno (<1 mês)",
-  [EsforcoEstimado.Medio]: "Médio (1-3 meses)",
-  [EsforcoEstimado.Grande]: "Grande (3+ meses)",
+  [EsforcoEstimado.Pequeno]: "Small (<1 month)",
+  [EsforcoEstimado.Medio]: "Medium (1-3 months)",
+  [EsforcoEstimado.Grande]: "Large (3+ months)",
 };
 
 export const StatusDemanda = {

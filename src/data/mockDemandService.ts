@@ -13,9 +13,11 @@ import {
   type DemandService,
   type AvaliacaoCriterio,
 } from "./types";
+import { seedDemands } from "./seedDemands";
 
-// v2: começa VAZIO (sem demandas de exemplo). O Admin pode popular a amostra.
-const LS_KEY_DEMANDS = "demand-system.demands.v2";
+// v3: semeia 5 demandas demo (2 aprovadas; Infra/AI/Apps) na primeira carga.
+// A troca de versão da chave também descarta estados antigos do fluxo de 3 gates.
+const LS_KEY_DEMANDS = "demand-system.demands.v3";
 
 function loadDemands(): Demand[] {
   try {
@@ -24,8 +26,9 @@ function loadDemands(): Demand[] {
   } catch {
     /* recreate */
   }
-  localStorage.setItem(LS_KEY_DEMANDS, JSON.stringify([]));
-  return [];
+  const iniciais = seedDemands();
+  localStorage.setItem(LS_KEY_DEMANDS, JSON.stringify(iniciais));
+  return iniciais;
 }
 
 function saveDemands(items: Demand[]) {
@@ -70,7 +73,7 @@ export const mockDemandService: DemandService = {
         criterio: "businessImpact",
         validadoPor: AUTO_AVALIADOR,
         validadoEm: now,
-        comentario: "Calculado automaticamente pelo nível de impacto informado no intake.",
+        comentario: "Automatically calculated from the impact level informed at intake.",
       });
     }
     const novo: Demand = {
