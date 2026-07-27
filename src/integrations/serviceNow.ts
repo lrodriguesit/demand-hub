@@ -7,8 +7,8 @@
    do app não muda, pois consome apenas esta interface.
 
    Direção dos dados:
-     IN  (ServiceNow → Demand Hub): disponibilidade de FTE / capacity.
-     OUT (Demand Hub → ServiceNow): projeto aprovado (RCE, PRJ#, estado).
+     IN  (ServiceNow → Intake Forms): disponibilidade de FTE / capacity.
+     OUT (Intake Forms → ServiceNow): projeto aprovado (RCE, PRJ#, estado).
      SYNC: estado do projeto/demanda.
    ============================================================ */
 import {
@@ -115,7 +115,7 @@ export async function syncDemandStatus(d: Demand): Promise<string> {
   return delay(`ServiceNow: estado = "${statusLabel[d.status]}" (sync simulado)`);
 }
 
-/** Resumo do mapeamento de campos Demand Hub ↔ ServiceNow (para o painel). */
+/** Resumo do mapeamento de campos Intake Forms ↔ ServiceNow (para o painel). */
 export const FIELD_MAPPING: { hub: string; snow: string; dir: "in" | "out" }[] = [
   { hub: "capacity (horas/FTE)", snow: `${serviceNowConfig.fteTable}.hours`, dir: "in" },
   { hub: "RCE", snow: "pm_project.u_rce", dir: "out" },

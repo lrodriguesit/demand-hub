@@ -280,7 +280,7 @@ export function SolicitarPage() {
             </Group>
             <Divider my="xs" />
             <Text ta="center" size="xs" c="dimmed">
-              Demand Hub · LIT Digitall — Free entry point (demo)
+              Intake Forms · LIT Digitall — Free entry point (demo)
             </Text>
           </Stack>
         )}

@@ -96,15 +96,15 @@ export async function generateMonthlyReport(demands: Demand[], ref = new Date())
   const stats = computeReportStats(demands, ref);
   const pptx = new pptxgen();
   pptx.layout = "LAYOUT_WIDE";
-  pptx.author = "Demand Hub";
+  pptx.author = "Intake Forms";
   pptx.company = "LIT Digitall";
-  pptx.title = `Demand Hub — Report ${stats.mesLabel}`;
+  pptx.title = `Intake Forms — Report ${stats.mesLabel}`;
 
   /* ---------- Capa ---------- */
   const capa = pptx.addSlide();
   capa.background = { color: NAVY };
   capa.addShape(pptx.ShapeType.rect, { x: 0, y: 3.9, w: "100%", h: 0.08, fill: { color: ACCENT } });
-  capa.addText("DEMAND HUB", { x: 0.6, y: 1.5, w: 11, h: 0.5, fontSize: 14, bold: true, color: ACCENT, charSpacing: 4 });
+  capa.addText("INTAKE FORMS", { x: 0.6, y: 1.5, w: 11, h: 0.5, fontSize: 14, bold: true, color: ACCENT, charSpacing: 4 });
   capa.addText("Monthly Request Report", { x: 0.6, y: 2.0, w: 11.5, h: 0.9, fontSize: 40, bold: true, color: WHITE });
   capa.addText(stats.mesLabel, { x: 0.6, y: 3.0, w: 11, h: 0.6, fontSize: 22, color: "C9D6EA" });
   capa.addText("LIT Digitall · Confidential", { x: 0.6, y: 6.6, w: 11, h: 0.3, fontSize: 11, color: "8AA0C0" });

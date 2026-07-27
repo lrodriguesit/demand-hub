@@ -61,7 +61,7 @@ function pageTitle(path: string): string {
   if (path.startsWith("/relatorio")) return "Monthly report";
   if (path.startsWith("/integraciones")) return "ServiceNow";
   if (path.startsWith("/admin")) return "Administration";
-  return "Demand Hub";
+  return "Intake Forms";
 }
 
 export function AppLayout() {
@@ -164,7 +164,7 @@ export function AppLayout() {
             <div className={classes.logoBox}>
               <img src={abbottLogo} alt="Abbott" className={classes.logoImg} />
             </div>
-            <div className={classes.brand1}>Demand Hub</div>
+            <div className={classes.brand1}>Intake Forms</div>
             <div className={classes.brandSub}>by LIT Digitall</div>
           </div>
 

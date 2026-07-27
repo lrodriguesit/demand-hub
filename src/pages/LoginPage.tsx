@@ -72,7 +72,7 @@ export function LoginPage() {
         </Box>
         <Box style={{ position: "relative", zIndex: 1, maxWidth: 460 }}>
           <Badge size="lg" variant="white" c="abbott.7" leftSection={<IconSparkles size={14} />} mb="md">
-            Demand Hub
+            Intake Forms
           </Badge>
           <Title order={1} style={{ fontSize: "2.6rem", lineHeight: 1.1 }}>
             Intake, score &amp; approve IT demand — in one flow.

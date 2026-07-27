@@ -4,7 +4,7 @@ export type Lang = "pt" | "en" | "es";
 
 const PT = {
   /* App */
-  appName: "Demand Hub",
+  appName: "Intake Forms",
   appTag: "by LIT Digitall",
   appDemoFooter: "Demo para liderança · LIT Digitall",
   loginUser: "Usuário",
@@ -426,7 +426,7 @@ const PT = {
 type Dict = typeof PT;
 
 const EN: Dict = {
-  appName: "Demand Hub",
+  appName: "Intake Forms",
   appTag: "by LIT Digitall",
   appDemoFooter: "Demo for leadership · LIT Digitall",
   loginUser: "Username",
@@ -825,7 +825,7 @@ const EN: Dict = {
 };
 
 const ES: Dict = {
-  appName: "Demand Hub",
+  appName: "Intake Forms",
   appTag: "by LIT Digitall",
   appDemoFooter: "Demo para liderazgo · LIT Digitall",
   loginUser: "Usuario",

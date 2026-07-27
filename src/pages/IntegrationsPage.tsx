@@ -112,7 +112,7 @@ export function IntegrationsPage() {
       <div>
         <Title order={2}>ServiceNow Integration</Title>
         <Text c="dimmed" mt={4}>
-          Integration preview: what data flows in and out between Demand Hub and ServiceNow.
+          Integration preview: what data flows in and out between Intake Forms and ServiceNow.
         </Text>
       </div>
 
@@ -239,7 +239,7 @@ export function IntegrationsPage() {
         <Table verticalSpacing="xs" fz="sm">
           <Table.Thead>
             <Table.Tr>
-              <Table.Th>Demand Hub</Table.Th>
+              <Table.Th>Intake Forms</Table.Th>
               <Table.Th>Direction</Table.Th>
               <Table.Th>ServiceNow</Table.Th>
             </Table.Tr>

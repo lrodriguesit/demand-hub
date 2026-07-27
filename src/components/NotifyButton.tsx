@@ -84,7 +84,7 @@ export function NotifyButton({ demand }: { demand: Demand }) {
               Subject
             </Text>
             <Text fw={700} mb="sm">
-              [Demand Hub] {demand.numero} — {demand.titulo} (score {wScore.toFixed(2)})
+              [Intake Forms] {demand.numero} — {demand.titulo} (score {wScore.toFixed(2)})
             </Text>
 
             <Text size="sm" mb="xs">
