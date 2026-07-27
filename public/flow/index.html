@@ -1,0 +1,253 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Demand Hub — Process Flow</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%23007ACC'/%3E%3Cstop offset='1' stop-color='%237C35FF'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='32' height='32' rx='7' fill='url(%23g)'/%3E%3Cpath d='M7 16h12m0 0-4-4m4 4-4 4' stroke='%23fff' stroke-width='3' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3Ccircle cx='24' cy='16' r='2.6' fill='%23fff'/%3E%3C/svg%3E" />
+<style>
+  :root{
+    --bg:#F4F6FA; --surface:#fff; --ink:#1A2B3C; --heading:#0A2540; --muted:#64748B;
+    --line:#E3EAF2; --blue:#007ACC; --navy:#004982; --blue-soft:#E6F3FB;
+    --grape:#7C35FF; --grape-soft:#F1EAFE; --ok:#2F9E44; --ok-soft:#EBFBEE;
+    --danger:#E03131; --danger-soft:#FFF5F5; --amber:#E8590C; --amber-soft:#FFF4E6;
+    --radius:12px; --shadow:0 2px 8px rgba(16,24,40,.06);
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:Inter,system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;line-height:1.55}
+  .wrap{max-width:1200px;margin:0 auto;padding:0 28px 72px}
+  header.hero{background:linear-gradient(115deg,#003a6b 0%,#004982 45%,#0a63a8 75%,#3a1d6e 135%);color:#fff}
+  header.hero .accent{height:3px;background:linear-gradient(90deg,#007ACC,#7C35FF)}
+  header.hero .inner{max-width:1200px;margin:0 auto;padding:44px 28px 46px;position:relative;overflow:hidden}
+  .kicker{text-transform:uppercase;letter-spacing:.14em;font-size:11.5px;font-weight:700;color:rgba(255,255,255,.75)}
+  header.hero h1{margin:8px 0 10px;font-size:clamp(26px,3.4vw,38px);font-weight:800;letter-spacing:-.5px}
+  header.hero p{margin:0;max-width:760px;color:rgba(255,255,255,.85);font-size:15px}
+  .hero-chips{display:flex;gap:8px;flex-wrap:wrap;margin-top:18px}
+  .hero-chip{background:rgba(255,255,255,.13);border:1px solid rgba(255,255,255,.2);
+    border-radius:999px;padding:6px 14px;font-size:12.5px;font-weight:600}
+  .backlink{position:absolute;top:20px;right:28px;color:#fff;text-decoration:none;font-size:13px;
+    background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.22);border-radius:999px;padding:7px 14px;font-weight:600}
+  .backlink:hover{background:rgba(255,255,255,.22)}
+  h2{font-size:20px;font-weight:800;color:var(--heading);margin:44px 0 6px}
+  .sub{color:var(--muted);font-size:14px;margin:0 0 18px}
+  .card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow)}
+
+  /* atores */
+  .actors{display:grid;gap:14px;grid-template-columns:repeat(auto-fit,minmax(240px,1fr))}
+  .actor{padding:18px}
+  .actor .n{width:34px;height:34px;border-radius:10px;display:flex;align-items:center;justify-content:center;
+    color:#fff;font-weight:800;font-size:15px;margin-bottom:10px}
+  .actor h3{margin:0 0 4px;font-size:15.5px;color:var(--heading)}
+  .actor p{margin:0;font-size:13px;color:var(--muted)}
+  .chips{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
+  .chip{border-radius:999px;padding:3px 10px;font-size:11.5px;font-weight:700}
+
+  /* pipeline */
+  .pipe{display:flex;gap:0;overflow-x:auto;padding:22px 18px;align-items:stretch}
+  .stage{min-width:150px;flex:1;position:relative;padding:0 18px 0 6px}
+  .stage:not(:last-child):after{content:"";position:absolute;right:2px;top:26px;width:12px;height:12px;
+    border-top:2.5px solid #B9CFE3;border-right:2.5px solid #B9CFE3;transform:rotate(45deg)}
+  .dot{width:30px;height:30px;border-radius:50%;background:var(--blue-soft);color:var(--navy);
+    display:flex;align-items:center;justify-content:center;font-weight:800;font-size:13px;margin-bottom:8px}
+  .stage b{display:block;font-size:13.5px;color:var(--heading)}
+  .stage span{font-size:11.5px;color:var(--muted);display:block;margin-top:3px}
+  .stage .who{margin-top:7px}
+  .laterals{display:flex;gap:10px;padding:0 18px 20px;flex-wrap:wrap}
+  .lateral{font-size:12px;font-weight:700;border-radius:8px;padding:6px 12px}
+
+  /* swimlanes */
+  .lanes{display:grid;gap:14px;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));align-items:start}
+  .lane{padding:16px}
+  .lane-h{display:flex;align-items:center;gap:9px;padding-bottom:12px;border-bottom:2px solid var(--line);margin-bottom:14px}
+  .lane-h .n{width:26px;height:26px;border-radius:8px;color:#fff;font-weight:800;font-size:13px;
+    display:flex;align-items:center;justify-content:center}
+  .lane-h b{font-size:14px;color:var(--heading)}
+  .step{position:relative;border:1px solid var(--line);border-radius:10px;padding:11px 12px 11px 14px;margin-bottom:22px;background:#FBFDFF}
+  .step:not(:last-child):after{content:"";position:absolute;left:50%;bottom:-18px;width:2px;height:14px;background:#C8D8E8}
+  .step .num{position:absolute;top:-11px;left:-9px;width:24px;height:24px;border-radius:50%;
+    background:linear-gradient(60deg,#006BB3,#7C35FF);color:#fff;font-size:12px;font-weight:800;
+    display:flex;align-items:center;justify-content:center;box-shadow:0 3px 8px rgba(0,73,130,.35)}
+  .step b{display:block;font-size:13px;color:var(--heading)}
+  .step span{font-size:12px;color:var(--muted);display:block;margin-top:3px}
+  .step.gate{background:var(--grape-soft);border-color:#D9C6FB}
+  .step.okk{background:var(--ok-soft);border-color:#BDE6C8}
+  .step.warn{background:var(--amber-soft);border-color:#F5D3AE}
+  .tag{display:inline-block;border-radius:999px;padding:2px 9px;font-size:10.5px;font-weight:800;
+    text-transform:uppercase;letter-spacing:.06em;margin-top:7px}
+
+  table{width:100%;border-collapse:collapse;font-size:13.5px}
+  th{color:var(--muted);text-align:left;font-weight:600;padding:11px 16px;border-bottom:1px solid var(--line)}
+  td{padding:11px 16px;border-bottom:1px solid var(--line)}
+  td b{color:var(--heading)}
+  .pill{border-radius:999px;padding:3px 11px;font-size:12px;font-weight:700}
+
+  .rules{display:grid;gap:14px;grid-template-columns:repeat(auto-fit,minmax(260px,1fr))}
+  .rule{padding:16px}
+  .rule h4{margin:0 0 6px;font-size:13.5px;color:var(--heading)}
+  .rule p{margin:0;font-size:12.5px;color:var(--muted)}
+  footer{margin-top:56px;color:var(--muted);font-size:12.5px;text-align:center}
+  @media(max-width:700px){.wrap{padding:0 14px 48px}.backlink{position:static;display:inline-block;margin-bottom:14px}}
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="accent"></div>
+  <div class="inner">
+    <a class="backlink" href="../">← Open the app</a>
+    <div class="kicker">Abbott · Demand Hub — by LIT Digitall</div>
+    <h1>Demand intake — end-to-end process flow</h1>
+    <p>One linear pipeline, four actors, a single decision gate routed by portfolio area.
+       Every action is role-gated: the request always knows who it is waiting on.</p>
+    <div class="hero-chips">
+      <span class="hero-chip">1 · Requester</span>
+      <span class="hero-chip">2 · PMO</span>
+      <span class="hero-chip">3 · Technical Team</span>
+      <span class="hero-chip">4 · Area Decisors — Sambini · Gabriela · AI</span>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <h2>The four actors</h2>
+  <p class="sub">Access is gated by role, not by name — the flow below tells which actor moves the request at each step.</p>
+  <div class="actors">
+    <div class="card actor">
+      <div class="n" style="background:#64748B">1</div>
+      <h3>Requester</h3>
+      <p>Opens the request in the guided wizard and describes the business need — no technical knowledge required. Fixes and resends when returned.</p>
+      <div class="chips"><span class="chip" style="background:#EEF2F7;color:#475569">Any employee</span></div>
+    </div>
+    <div class="card actor">
+      <div class="n" style="background:#0E8074">2</div>
+      <h3>PMO</h3>
+      <p>Runs triage, validates urgency/compliance, sets the final ranking (score × capacity) and releases execution. Orchestrates the whole pipeline.</p>
+      <div class="chips"><span class="chip" style="background:#E2F5F2;color:#0E8074">Paula (demo)</span></div>
+    </div>
+    <div class="card actor">
+      <div class="n" style="background:#7048E8">3</div>
+      <h3>Technical Team</h3>
+      <p>Evaluates the demand: technical score, estimated effort (hours), delivery team — the Abbott Project Type is derived automatically.</p>
+      <div class="chips"><span class="chip" style="background:#F0EBFD;color:#6741D9">Evaluators</span></div>
+    </div>
+    <div class="card actor">
+      <div class="n" style="background:linear-gradient(60deg,#006BB3,#7C35FF)">4</div>
+      <h3>Area Decisors (DMC)</h3>
+      <p>One decision gate per request, routed by portfolio area. The decisor approves (→ prioritization) or rejects with justification.</p>
+      <div class="chips">
+        <span class="chip" style="background:#EEF2F7;color:#475569">Infra → Sambini</span>
+        <span class="chip" style="background:#DDF3F9;color:#0B7285">Apps → Gabriela</span>
+        <span class="chip" style="background:#F0EBFD;color:#6741D9">AI → AI Decisor</span>
+      </div>
+    </div>
+  </div>
+
+  <h2>Pipeline overview</h2>
+  <p class="sub">Seven linear stages. Two lateral states (Returned / Rejected) always carry a written justification.</p>
+  <div class="card">
+    <div class="pipe">
+      <div class="stage"><div class="dot">1</div><b>Draft</b><span>Wizard + review, save draft</span>
+        <div class="who"><span class="chip" style="background:#EEF2F7;color:#475569">Requester</span></div></div>
+      <div class="stage"><div class="dot">2</div><b>Triage</b><span>Complete enough? Accept / return / reject</span>
+        <div class="who"><span class="chip" style="background:#E2F5F2;color:#0E8074">PMO</span></div></div>
+      <div class="stage"><div class="dot">3</div><b>Evaluation</b><span>Score, effort, team (capacity)</span>
+        <div class="who"><span class="chip" style="background:#F0EBFD;color:#6741D9">Technical Team</span></div></div>
+      <div class="stage"><div class="dot">4</div><b>Approval</b><span>Area decisor gate (single)</span>
+        <div class="who"><span class="chip" style="background:#E6F3FB;color:#004982">Decisor</span></div></div>
+      <div class="stage"><div class="dot">5</div><b>Prioritized</b><span>Ranking: score × capacity</span>
+        <div class="who"><span class="chip" style="background:#E2F5F2;color:#0E8074">PMO</span></div></div>
+      <div class="stage"><div class="dot">6</div><b>Execution</b><span>Delivery in progress</span>
+        <div class="who"><span class="chip" style="background:#F0EBFD;color:#6741D9">Technical Team</span></div></div>
+      <div class="stage"><div class="dot">7</div><b>Completed</b><span>Delivered &amp; closed</span>
+        <div class="who"><span class="chip" style="background:#EBFBEE;color:#2B8A3E">Done</span></div></div>
+    </div>
+    <div class="laterals">
+      <span class="lateral" style="background:var(--amber-soft);color:var(--amber)">↩ Returned — back to the Requester with justification (steps 2–3)</span>
+      <span class="lateral" style="background:var(--danger-soft);color:var(--danger)">✕ Rejected — terminal, always with justification (steps 2–4)</span>
+    </div>
+  </div>
+
+  <h2>Detailed flow — who does what</h2>
+  <p class="sub">Follow the numbers across the lanes. Purple = the decision gate; amber = return paths.</p>
+  <div class="lanes">
+    <div class="card lane">
+      <div class="lane-h"><span class="n" style="background:#64748B">R</span><b>Requester</b></div>
+      <div class="step"><span class="num">1</span><b>Create the request</b>
+        <span>3-step wizard + review with per-section edit: need, impact scope (auto business-impact score: User 2 · Process 3 · Department 4 · Infrastructure 5), urgency, consequence of not executing, value range, classification (Infra / AI / Apps), affected apps (searchable), RCE, attachments. Save draft anytime.</span>
+        <span class="tag" style="background:#E6F3FB;color:#004982">Submit → Triage</span></div>
+      <div class="step warn"><span class="num">2b</span><b>Fix &amp; resend</b>
+        <span>If returned by PMO, the requester completes the missing info and resends to triage.</span></div>
+    </div>
+
+    <div class="card lane">
+      <div class="lane-h"><span class="n" style="background:#0E8074">P</span><b>PMO</b></div>
+      <div class="step"><span class="num">2</span><b>Triage</b>
+        <span>Checks completeness &amp; duplicates. <b>Accept</b> → evaluation · <b>Return</b> (justification) · <b>Reject</b> (justification).</span></div>
+      <div class="step"><span class="num">5</span><b>Set ranking priority</b>
+        <span>After the decisor approves: positions the demand in the ranking — weighted score × team capacity (Score Board / Capacity).</span></div>
+      <div class="step okk"><span class="num">6</span><b>Release execution</b>
+        <span>Guard: ranking priority set + capacity defined. Registers ServiceNow / project IDs.</span></div>
+    </div>
+
+    <div class="card lane">
+      <div class="lane-h"><span class="n" style="background:#7048E8">T</span><b>Technical Team</b></div>
+      <div class="step"><span class="num">3</span><b>Evaluate the demand</b>
+        <span>Scores the 7 weighted criteria (25/15/10/20/15/10/5), defines delivery team and estimated hours. Abbott Project Type derives automatically: &lt;80h → Minor Enhancement · &lt;US$500k → RAPID/Sprint · ≥US$500k → Phase 0.</span>
+        <span class="tag" style="background:#F0EBFD;color:#6741D9">Guard: capacity required</span>
+        <span class="tag" style="background:#E6F3FB;color:#004982">Send to approval</span></div>
+      <div class="step"><span class="num">7</span><b>Execute &amp; complete</b>
+        <span>Delivers the project and completes the request (with PMO).</span></div>
+    </div>
+
+    <div class="card lane">
+      <div class="lane-h"><span class="n" style="background:linear-gradient(60deg,#006BB3,#7C35FF)">D</span><b>Area Decisor</b></div>
+      <div class="step gate"><span class="num">4</span><b>Area decision gate</b>
+        <span>The request is routed to the decisor of its portfolio area (table below). Only that decisor sees it in the inbox.</span>
+        <span class="tag" style="background:#EBFBEE;color:#2B8A3E">Approve → Prioritized (DMC accepted)</span>
+        <span class="tag" style="background:#FFF5F5;color:#C92A2A">Reject → justification required</span></div>
+      <div class="step"><b>Visibility</b>
+        <span>Executive metrics in Approvers Status: pending per decisor (Sambini / Gabriela / AI), with priority of each pending approval.</span></div>
+    </div>
+  </div>
+
+  <h2>Decision routing</h2>
+  <p class="sub">The single approval gate is assigned by the demand classification (explicit field, or derived from the demand type).</p>
+  <div class="card" style="overflow-x:auto">
+    <table>
+      <thead><tr><th>Portfolio area</th><th>Demand types (default derivation)</th><th>Decisor</th></tr></thead>
+      <tbody>
+        <tr><td><span class="pill" style="background:#EEF2F7;color:#475569">Infrastructure</span></td>
+            <td>Infrastructure · Security</td><td><b>Sambini</b></td></tr>
+        <tr><td><span class="pill" style="background:#DDF3F9;color:#0B7285">Applications</span></td>
+            <td>New project · System improvement · Bug fix · Automation · Compliance</td><td><b>Gabriela</b></td></tr>
+        <tr><td><span class="pill" style="background:#F0EBFD;color:#6741D9">Artificial Intelligence</span></td>
+            <td>AI-classified demands (explicit classification)</td><td><b>AI Decisor</b></td></tr>
+        <tr><td><span class="pill" style="background:#FFF4E6;color:#D9480F">Other</span></td>
+            <td>Uncategorized</td><td><b>DMC Committee</b> (any decisor)</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h2>Rules &amp; guards</h2>
+  <p class="sub">The engine blocks dead-ends: every state always has a next action and an owner.</p>
+  <div class="rules">
+    <div class="card rule"><h4>Justification is mandatory</h4>
+      <p>Every Return and every Reject — in triage, evaluation or the decision gate — requires a written justification, stored in the request history.</p></div>
+    <div class="card rule"><h4>Capacity before approval</h4>
+      <p>The Technical Team must define delivery team + estimated hours before the request can be sent to the decisor.</p></div>
+    <div class="card rule"><h4>Priority before execution</h4>
+      <p>PMO must set the ranking position (score × capacity) before execution can start.</p></div>
+    <div class="card rule"><h4>Gate recreated on entry</h4>
+      <p>Whenever a request enters Approval, the decisor gate is recreated as Pending and routed by the current classification — no stale approvals.</p></div>
+    <div class="card rule"><h4>Weighted score (100% = 5.00)</h4>
+      <p>Business impact 25 · Risk of not executing 15 · Technical challenge 10 · Revenue 20 · Strategic fit 15 · Stakeholder 10 · Urgency 5. Business impact is automatic from the impact scope.</p></div>
+    <div class="card rule"><h4>Notifications</h4>
+      <p>Each hand-off notifies the next actor (inbox + bell badge; Teams/e-mail in the connected version). The requester can always see the current status.</p></div>
+  </div>
+
+  <footer>Abbott · IT Demand Hub — process flow · by LIT Digitall</footer>
+</div>
+</body>
+</html>

@@ -88,7 +88,7 @@ export const mockDemandService: DemandService = {
       avaliacoes,
       stackValidadaPor: "",
       stackValidadaEm: "",
-      aprovacoes: aprovacoesPadrao(input.sponsor),
+      aprovacoes: aprovacoesPadrao(input),
       respostaBusiness: "",
       dmcAprovado: null,
       dmcData: "",

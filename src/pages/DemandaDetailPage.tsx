@@ -259,7 +259,7 @@ export function DemandaDetailPage() {
         onSave={(changes) => persist(changes, { silent: true })}
       />
 
-      {/* Stepper do fluxo de aprovação (Sponsor → Tech Lead → Director/DMC) */}
+      {/* Stepper do fluxo de aprovação (gate único do Decisor da área) */}
       {demand.aprovacoes.length > 0 && (() => {
         const nextIdx = demand.aprovacoes.findIndex((a) => a.status === "pendente");
         return (
@@ -273,7 +273,7 @@ export function DemandaDetailPage() {
             <Group gap={0} align="flex-start" wrap="nowrap" style={{ overflowX: "auto" }}>
               {demand.aprovacoes.map((a, i) => {
                 const label =
-                  a.nivel === "sponsor" ? "Sponsor" : a.nivel === "techlead" ? "Tech Lead" : "Director (DMC)";
+                  a.nivel === "decisor" ? "Area Decisor" : a.nivel === "sponsor" ? "Sponsor" : a.nivel === "techlead" ? "Tech Lead" : "Director (DMC)";
                 const approved = a.status === "aprovado";
                 const rejected = a.status === "recusado";
                 const isNext = i === nextIdx;

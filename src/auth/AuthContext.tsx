@@ -8,6 +8,7 @@
    ============================================================ */
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
 import { PERSONAS, personaById, type Persona, type Role } from "../domain/roles";
+import type { Categoria } from "../data/types";
 
 const LS_KEY = "demand-system.persona.v1";
 
@@ -20,6 +21,8 @@ export interface AuthSession {
   area: string;
   cargo: string;
   roles: Role[];
+  /** Para Decisores: frentes do portfólio que esta persona decide. */
+  decisorDe: Categoria[];
   signedAt: string;
 }
 
@@ -49,6 +52,7 @@ function sessionFromPersona(p: Persona): AuthSession {
     area: p.area,
     cargo: p.cargo,
     roles: p.roles,
+    decisorDe: p.decisorDe ?? [],
     signedAt: new Date().toISOString(),
   };
 }

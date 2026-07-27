@@ -1,23 +1,29 @@
 /* ============================================================
    Perfis de acesso (RBAC) + personas demo.
 
-   Gating é por PAPEL, não por nome. Cada gate do fluxo declara
-   qual papel pode agir; qualquer persona que tenha esse papel
-   pode executar a ação. Isso desacopla o fluxo das pessoas e
-   torna as filas ("o que precisa de mim agora") confiáveis.
+   MODELO DE 4 ATORES (fluxo oficial):
+     1. Requester      — abre a demanda (intake).
+     2. PMO            — triagem, orquestração e priorização (ranking).
+     3. Technical Team — avalia a demanda (score técnico, time e horas).
+     4. Area Decisor   — decide o gate de aprovação da SUA frente:
+                         Infra → Sambini · Apps → Gabriela · AI → AI Decisor.
+   (+ Admin para configuração/demonstração.)
+
+   Gating é por PAPEL, não por nome; o gate de decisão também é
+   roteado pela ÁREA da demanda (persona.decisorDe).
    ============================================================ */
+
+import type { Categoria } from "../data/types";
 
 export const Role = {
   /** Abre demandas; preenche o lado de negócio do intake. */
   Solicitante: "solicitante",
-  /** Patrocina e valida critérios de NEGÓCIO; 1º gate de aprovação. */
-  Sponsor: "sponsor",
-  /** Define impacto TÉCNICO, esforço, time/horas; 2º gate. */
+  /** Avalia a demanda: impacto técnico, esforço, time/horas. */
   TechLead: "techlead",
   /** Triagem, urgência (compliance), prioridade final; orquestra. */
   PMO: "pmo",
-  /** Decisão final (DMC); 3º gate. */
-  Diretor: "diretor",
+  /** Decisor da área (Infra / Apps / AI) — gate único de aprovação. */
+  Decisor: "decisor",
   /** Cadastros e configuração. */
   Admin: "admin",
 } as const;
@@ -25,37 +31,36 @@ export type Role = (typeof Role)[keyof typeof Role];
 
 export const ROLE_LABEL: Record<Role, string> = {
   solicitante: "Requester",
-  sponsor: "Sponsor / Business",
-  techlead: "Tech Lead",
+  techlead: "Technical Team",
   pmo: "PMO",
-  diretor: "Director (DMC)",
+  decisor: "Area Decisor",
   admin: "Administrator",
 };
 
 export const ROLE_LABEL_EN: Record<Role, string> = {
   solicitante: "Requester",
-  sponsor: "Sponsor / Business",
-  techlead: "Tech Lead",
+  techlead: "Technical Team",
   pmo: "PMO",
-  diretor: "Director (DMC)",
+  decisor: "Area Decisor",
   admin: "Administrator",
 };
 
 export const ROLE_DESC: Record<Role, string> = {
-  solicitante: "Opens the request and describes the business side. Does not need to know the technical impact.",
-  sponsor: "Sponsors the request and validates the business criteria (impact, revenue, strategy).",
-  techlead: "Defines technical impact, effort and assigns team/hours (capacity).",
+  solicitante:
+    "Opens the request and describes the business side. Does not need to know the technical impact.",
+  techlead:
+    "Evaluates the demand: technical impact, effort, and assigns team/hours (capacity).",
   pmo: "Runs triage, assesses urgency/compliance and sets the final ranking priority.",
-  diretor: "Final committee (DMC) approval and release to execution.",
-  admin: "Manages catalogs (areas, sponsors, evaluators) and configuration.",
+  decisor:
+    "Decides the approval gate of their portfolio area: Infrastructure (Sambini), Applications (Gabriela) or AI.",
+  admin: "Manages catalogs (areas, decisors, evaluators) and configuration.",
 };
 
 export const ROLE_COLOR: Record<Role, string> = {
   solicitante: "gray",
-  sponsor: "blue",
   techlead: "violet",
   pmo: "teal",
-  diretor: "indigo",
+  decisor: "indigo",
   admin: "dark",
 };
 
@@ -68,35 +73,18 @@ export interface Persona {
   area: string;
   cargo: string;
   roles: Role[];
+  /** Para Decisores: quais frentes do portfólio esta pessoa decide. */
+  decisorDe?: Categoria[];
 }
 
-/* Nomes alinhados aos aprovadores históricos do mock data
-   (Daniela Bastos = Tech Lead, Marcelo Tavares = Diretor),
-   para que as demandas-semente já caiam nas filas certas. */
 export const PERSONAS: Persona[] = [
   {
     id: "ana",
     nome: "Ana Ribeiro",
     email: "ana.ribeiro@litdigitall.com.br",
     area: "Commercial",
-    cargo: "Business Analyst",
+    cargo: "Business Analyst (Requester)",
     roles: [Role.Solicitante],
-  },
-  {
-    id: "carlos",
-    nome: "Carlos Mendes",
-    email: "carlos.mendes@litdigitall.com.br",
-    area: "Commercial",
-    cargo: "Commercial Director (Sponsor)",
-    roles: [Role.Sponsor],
-  },
-  {
-    id: "daniela",
-    nome: "Daniela Bastos",
-    email: "daniela.bastos@litdigitall.com.br",
-    area: "Technology",
-    cargo: "Tech Lead / Solutions Architect",
-    roles: [Role.TechLead],
   },
   {
     id: "paula",
@@ -107,21 +95,49 @@ export const PERSONAS: Persona[] = [
     roles: [Role.PMO],
   },
   {
-    id: "marcelo",
-    nome: "Marcelo Tavares",
-    email: "marcelo.tavares@litdigitall.com.br",
-    area: "Leadership",
-    cargo: "IT Director (DMC)",
-    roles: [Role.Diretor],
+    id: "daniela",
+    nome: "Daniela Bastos",
+    email: "daniela.bastos@litdigitall.com.br",
+    area: "Technology",
+    cargo: "Technical Team / Solutions Architect",
+    roles: [Role.TechLead],
   },
   {
     id: "sambini",
-    nome: "Sambini (Admin)",
+    nome: "Sambini",
     email: "sambini@litdigitall.com.br",
+    area: "Infrastructure",
+    cargo: "Area Decisor — Infrastructure",
+    roles: [Role.Decisor],
+    decisorDe: ["infra"],
+  },
+  {
+    id: "gabriela",
+    nome: "Gabriela",
+    email: "gabriela@litdigitall.com.br",
+    area: "Applications",
+    cargo: "Area Decisor — Applications",
+    roles: [Role.Decisor],
+    decisorDe: ["app"],
+  },
+  {
+    id: "aidecisor",
+    nome: "AI Decisor",
+    email: "ai.decisor@litdigitall.com.br",
+    area: "Artificial Intelligence",
+    cargo: "Area Decisor — AI",
+    roles: [Role.Decisor],
+    decisorDe: ["ia"],
+  },
+  {
+    id: "admin",
+    nome: "IT Admin",
+    email: "admin@litdigitall.com.br",
     area: "Technology",
     cargo: "System Administrator",
     /* Admin enxerga e opera tudo — útil para configurar e demonstrar. */
-    roles: [Role.Admin, Role.PMO, Role.TechLead, Role.Sponsor, Role.Diretor, Role.Solicitante],
+    roles: [Role.Admin, Role.PMO, Role.TechLead, Role.Decisor, Role.Solicitante],
+    decisorDe: ["infra", "ia", "app", "otro"],
   },
 ];
 

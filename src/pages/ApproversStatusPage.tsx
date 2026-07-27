@@ -18,12 +18,21 @@ import {
 } from "@mantine/core";
 import { IconCheck, IconClock, IconX } from "@tabler/icons-react";
 import { demandService } from "../data/demandService";
-import { StatusDemanda, criticidad, statusLabel, type AprovacaoStep, type Demand } from "../data/types";
+import {
+  StatusDemanda,
+  criticidad,
+  statusLabel,
+  clasificacionEfetiva,
+  type AprovacaoStep,
+  type Categoria,
+  type Demand,
+} from "../data/types";
 
 const NIVEL_LABEL: Record<string, string> = {
-  sponsor: "Sponsor",
-  techlead: "Tech Lead",
-  diretor: "Director (DMC)",
+  decisor: "Area Decisor",
+  sponsor: "Sponsor (legacy)",
+  techlead: "Tech Lead (legacy)",
+  diretor: "Director (legacy)",
 };
 
 function GateBadge({ step }: { step: AprovacaoStep }) {
@@ -54,15 +63,15 @@ export function ApproversStatusPage() {
 
   if (loading) return <Center h="60vh"><Loader /></Center>;
 
-  /* Métricas executivas (análise UX): pendências por gate. */
+  /* Métricas executivas (análise UX): pendências por DECISOR DE ÁREA. */
   const waiting = items.filter((d) => d.status === StatusDemanda.EmAprovacao);
-  const waitingOn = (nivel: string) =>
-    waiting.filter((d) => d.aprovacoes.find((a) => a.status === "pendente")?.nivel === nivel).length;
+  const waitingArea = (cat: Categoria) =>
+    waiting.filter((d) => clasificacionEfetiva(d) === cat).length;
   const metrics = [
     { label: "Pending approvals", value: waiting.length, color: "abbott" },
-    { label: "Waiting on Sponsor", value: waitingOn("sponsor"), color: "blue" },
-    { label: "Waiting on Tech Lead", value: waitingOn("techlead"), color: "violet" },
-    { label: "Waiting on Director", value: waitingOn("diretor"), color: "indigo" },
+    { label: "Waiting on Sambini (Infra)", value: waitingArea("infra"), color: "gray" },
+    { label: "Waiting on Gabriela (Apps)", value: waitingArea("app"), color: "cyan" },
+    { label: "Waiting on AI Decisor (AI)", value: waitingArea("ia"), color: "violet" },
   ];
 
   return (
@@ -70,7 +79,8 @@ export function ApproversStatusPage() {
       <div>
         <Title order={2}>Approvers Status</Title>
         <Text c="dimmed" mt={4}>
-          Status of the approval gates (Sponsor → Tech Lead → Director/DMC) per demand.
+          Single approval gate per demand, decided by the area decisor — Infrastructure →
+          Sambini · Applications → Gabriela · AI → AI Decisor.
         </Text>
       </div>
 

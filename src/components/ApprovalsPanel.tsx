@@ -48,11 +48,13 @@ interface Props {
   interactive?: boolean;
 }
 
-const NIVEL_COLOR = {
+/* decisor = gate único do fluxo atual; níveis legados mantidos para dados antigos. */
+const NIVEL_COLOR: Record<string, string> = {
+  decisor: "indigo",
   sponsor: "blue",
   techlead: "violet",
   diretor: "teal",
-} as const;
+};
 
 export function ApprovalsPanel({ demand, onSave, interactive = true }: Props) {
   const { t, lang } = useT();
@@ -66,7 +68,7 @@ export function ApprovalsPanel({ demand, onSave, interactive = true }: Props) {
 
   const steps = demand.aprovacoes.length
     ? demand.aprovacoes
-    : aprovacoesPadrao(demand.sponsor);
+    : aprovacoesPadrao(demand);
   const aprovados = steps.filter((s) => s.status === "aprovado").length;
   const recusados = steps.filter((s) => s.status === "recusado").length;
   const completos = aprovados + recusados;
@@ -76,7 +78,7 @@ export function ApprovalsPanel({ demand, onSave, interactive = true }: Props) {
   const userKey = user.name.toLowerCase();
 
   async function inicializar() {
-    await onSave({ aprovacoes: aprovacoesPadrao(demand.sponsor) });
+    await onSave({ aprovacoes: aprovacoesPadrao(demand) });
   }
 
   async function decidir() {
@@ -120,8 +122,9 @@ export function ApprovalsPanel({ demand, onSave, interactive = true }: Props) {
           </ThemeIcon>
           <Text fw={700}>Approval workflow not initialized</Text>
           <Text size="sm" c="dimmed" ta="center" maw={460}>
-            Requests created in the app already come with the standard sequence (Sponsor →
-            Tech Lead → Director). To initialize it on this existing request, click below.
+            Requests created in the app are routed to the decisor of their portfolio area
+            (Infrastructure → Sambini · Applications → Gabriela · AI → AI Decisor). To
+            initialize it on this existing request, click below.
           </Text>
           <Button onClick={inicializar}>Initialize approval flow</Button>
         </Stack>
@@ -306,10 +309,11 @@ export function ApprovalsPanel({ demand, onSave, interactive = true }: Props) {
 
       <Alert color="abbott" variant="light" icon={<IconInfoCircle size={18} />}>
         <Text size="sm">
-          <strong>Rule:</strong> any rejection moves the request to the{" "}
-          <em>Rejected</em> status. All 3 approvals release it to <em>Prioritized</em>. Requests
-          in approval appear in the current approver's <strong>My inbox</strong> and
-          count toward the bell badge above.
+          <strong>Rule:</strong> the gate is decided by the <strong>area decisor</strong>{" "}
+          (Infrastructure → Sambini · Applications → Gabriela · AI → AI Decisor). A rejection
+          moves the request to <em>Rejected</em>; the approval releases it to{" "}
+          <em>Prioritized</em>, where the PMO sets the ranking. Requests in approval appear
+          in the decisor's <strong>My inbox</strong> and count toward the bell badge above.
         </Text>
       </Alert>
 

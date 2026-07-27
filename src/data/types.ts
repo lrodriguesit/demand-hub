@@ -165,9 +165,10 @@ export const CATEGORIA_VIEW_LABEL: Record<Categoria, string> = {
   app: "Applications",
   otro: "Other",
 };
+/* Decisor de cada frente do portfólio (gate único de aprovação). */
 export const CATEGORIA_RESPONSAVEL: Record<Categoria, string> = {
   infra: "Sambini",
-  ia: "AI Team",
+  ia: "AI Decisor",
   app: "Gabriela",
   otro: "—",
 };
@@ -246,9 +247,9 @@ export const CATEGORIA_LABEL: Record<CategoriaAvaliacao, string> = {
 };
 
 export const CATEGORIA_DESCRICAO: Record<CategoriaAvaliacao, string> = {
-  negocio: "Validado pelo sponsor ou owner do processo",
-  tecnico: "Validado pelo Tech Lead / Arquiteto de Soluções",
-  pmo: "Validado pelo PMO ou Compliance",
+  negocio: "Validated by the PMO with the requester/sponsor input",
+  tecnico: "Validated by the Technical Team (evaluators)",
+  pmo: "Validated by the PMO (urgency/compliance)",
 };
 
 export const CATEGORIA_COR: Record<CategoriaAvaliacao, string> = {
@@ -265,23 +266,26 @@ export interface AvaliacaoCriterio {
 }
 
 /* ---------------- Aprovações ------------------------------- */
-/** Step do fluxo de aprovação da demanda (3 níveis padrão). */
+/** Step do fluxo de aprovação: UM gate, decidido pelo DECISOR DA ÁREA
+    da demanda (Infra → Sambini · Apps → Gabriela · AI → AI Decisor). */
 export const NivelAprovacao = {
-  Sponsor: "sponsor",
-  TechLead: "techlead",
-  Diretor: "diretor",
+  Decisor: "decisor",
 } as const;
 export type NivelAprovacao = (typeof NivelAprovacao)[keyof typeof NivelAprovacao];
 
-export const nivelAprovacaoLabel: Record<NivelAprovacao, string> = {
-  sponsor: "Sponsor",
-  techlead: "Tech Lead",
-  diretor: "Diretor de TI",
+/* Records tipados como Record<string,…> de propósito: dados antigos podem
+   conter os níveis legados (sponsor/techlead/diretor) e não podem quebrar a UI. */
+export const nivelAprovacaoLabel: Record<string, string> = {
+  decisor: "Decisor da área",
+  sponsor: "Sponsor (legado)",
+  techlead: "Tech Lead (legado)",
+  diretor: "Diretor (legado)",
 };
-export const nivelAprovacaoLabelEN: Record<NivelAprovacao, string> = {
-  sponsor: "Sponsor",
-  techlead: "Tech Lead",
-  diretor: "IT Director",
+export const nivelAprovacaoLabelEN: Record<string, string> = {
+  decisor: "Area Decisor",
+  sponsor: "Sponsor (legacy)",
+  techlead: "Tech Lead (legacy)",
+  diretor: "Director (legacy)",
 };
 
 export const StatusAprovacao = {
@@ -445,26 +449,19 @@ export function fluxoEstagios(d: {
   );
 }
 
-/** Cria a sequência padrão de aprovação para uma demanda nova. */
-export function aprovacoesPadrao(sponsor: string): AprovacaoStep[] {
+/** Cria a sequência padrão de aprovação para uma demanda: UM gate com o
+    decisor da área da demanda (roteado pela classificação Infra/AI/Apps). */
+export function aprovacoesPadrao(d: { clasificacion?: string; tipo: number }): AprovacaoStep[] {
+  const cat = clasificacionEfetiva(d);
+  const nome = CATEGORIA_RESPONSAVEL[cat];
+  const responsavel =
+    cat === "otro" || nome === "—"
+      ? "DMC Committee"
+      : `${nome} · ${CATEGORIA_VIEW_LABEL[cat]}`;
   return [
     {
-      nivel: "sponsor",
-      responsavel: sponsor || "Sponsor designado",
-      status: "pendente",
-      acaoEm: "",
-      comentario: "",
-    },
-    {
-      nivel: "techlead",
-      responsavel: "Daniela Bastos (Tech Lead)",
-      status: "pendente",
-      acaoEm: "",
-      comentario: "",
-    },
-    {
-      nivel: "diretor",
-      responsavel: "Marcelo Tavares (IT Director)",
+      nivel: "decisor",
+      responsavel,
       status: "pendente",
       acaoEm: "",
       comentario: "",

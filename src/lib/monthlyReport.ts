@@ -127,7 +127,7 @@ export async function generateMonthlyReport(demands: Demand[], ref = new Date())
   kpiCard(resumo, pptx, xs[2], y2, cardW, stats.total, "Total in the database", NAVY);
 
   resumo.addText(
-    "Funnel: Ideas → Triage → Evaluation (scoring) → Approval (Sponsor → Tech Lead → Director) → Prioritization → Execution → Completion.",
+    "Funnel: Ideas → Triage → Evaluation (Technical Team) → Approval (Area Decisor: Infra/Sambini · Apps/Gabriela · AI) → Prioritization (PMO) → Execution → Completion.",
     { x: 0.5, y: y2 + 1.6, w: 12.3, h: 0.5, fontSize: 12, italic: true, color: GRAY },
   );
 

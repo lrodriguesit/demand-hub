@@ -66,8 +66,8 @@ export function AprovacoesPage() {
   }, []);
 
   const pendentes = useMemo(
-    () => items.filter((d) => precisaDeMim(d, roles)),
-    [items, roles],
+    () => items.filter((d) => precisaDeMim(d, roles, user.decisorDe)),
+    [items, roles, user.decisorDe],
   );
 
   if (loading) {

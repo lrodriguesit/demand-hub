@@ -64,9 +64,10 @@ const CATEGORIA_ICON: Record<CategoriaAvaliacao, typeof IconRocket> = {
   pmo: IconShieldCheck,
 };
 
-/* Quem pode pontuar cada estação de avaliação. */
+/* Quem pode pontuar cada estação de avaliação (modelo de 4 atores):
+   negócio → PMO (com input do requester/sponsor) · técnico → Technical Team. */
 const CATEGORIA_PAPEL: Record<CategoriaAvaliacao, Role> = {
-  negocio: Role.Sponsor,
+  negocio: Role.PMO,
   tecnico: Role.TechLead,
   pmo: Role.PMO,
 };

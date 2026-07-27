@@ -359,7 +359,7 @@ class DataverseDemandService implements DemandService {
       avaliacoes: [],
       stackValidadaPor: "",
       stackValidadaEm: "",
-      aprovacoes: aprovacoesPadrao(input.sponsor),
+      aprovacoes: aprovacoesPadrao(input),
       respostaBusiness: "",
       dmcAprovado: null,
       dmcData: "",

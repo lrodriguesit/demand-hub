@@ -25,6 +25,7 @@ import {
   IconPlugConnected,
   IconPlus,
   IconPresentation,
+  IconRoute,
   IconSettings,
   type Icon,
 } from "@tabler/icons-react";
@@ -79,7 +80,7 @@ export function AppLayout() {
         .list()
         .then((items) => {
           if (cancelled) return;
-          setPendentes(items.filter((d) => precisaDeMim(d, roles)).length);
+          setPendentes(items.filter((d) => precisaDeMim(d, roles, user.decisorDe)).length);
         })
         .catch(() => {});
     }
@@ -93,7 +94,7 @@ export function AppLayout() {
 
   const isAdmin = roles.includes(Role.Admin);
   const canCreate = roles.includes(Role.Solicitante) || isAdmin;
-  const gate = [Role.PMO, Role.Diretor, Role.Sponsor, Role.Admin];
+  const gate = [Role.PMO, Role.Decisor, Role.Admin];
 
   /* Menú agrupado (análise UX): Demands / Tracking / Administration */
   const NAV_HOME: NavItem[] = [{ to: "/", label: "Home", icon: IconLayoutDashboard, end: true }];
@@ -199,6 +200,13 @@ export function AppLayout() {
               <span>{n.label}</span>
             </RouterNavLink>
           ))}
+
+          <div className={classes.navSection}>Process</div>
+          {/* Fluxograma completo (página estática dedicada — abre em nova aba) */}
+          <a href="flow/index.html" target="_blank" rel="noreferrer" className={classes.navItem}>
+            <IconRoute size={19} stroke={1.7} />
+            <span>Process flow</span>
+          </a>
 
           {isAdmin && (
             <>

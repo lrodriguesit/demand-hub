@@ -42,6 +42,7 @@ import {
   type AcaoContexto,
 } from "../domain/workflow";
 import { ROLE_LABEL, type Role } from "../domain/roles";
+import { useCurrentUser } from "../lib/useCurrentUser";
 
 interface Props {
   demand: Demand;
@@ -51,7 +52,8 @@ interface Props {
 }
 
 export function NextActionCard({ demand, roles, ator, onSave }: Props) {
-  const minhas = proximasAcoes(demand, roles);
+  const { decisorDe } = useCurrentUser();
+  const minhas = proximasAcoes(demand, roles, decisorDe);
   const haEstado = acoesDoEstado(demand.status).length > 0;
   const [modal, setModal] = useState<{ acao: Acao; ctx: AcaoContexto } | null>(null);
 

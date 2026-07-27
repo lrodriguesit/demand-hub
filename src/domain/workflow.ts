@@ -19,6 +19,10 @@ import {
   CRITERIO_CATEGORIA,
   aprovacoesPadrao,
   processoRecomendado,
+  clasificacionEfetiva,
+  CATEGORIA_RESPONSAVEL,
+  CATEGORIA_VIEW_LABEL,
+  type Categoria,
   type Demand,
   type Score,
   type AprovacaoStep,
@@ -26,20 +30,19 @@ import {
 } from "../data/types";
 import { Role, ROLE_LABEL } from "./roles";
 
-/* Mapeia o nível de aprovação (dado da demanda) para o papel RBAC. */
+/* Mapeia o nível de aprovação (dado da demanda) para o papel RBAC.
+   Fluxo de 4 atores: o gate único de aprovação é do DECISOR DA ÁREA. */
 export const NIVEL_PARA_PAPEL: Record<NivelAprovacao, Role> = {
-  sponsor: Role.Sponsor,
-  techlead: Role.TechLead,
-  diretor: Role.Diretor,
+  decisor: Role.Decisor,
 };
 
 /* ---------------- Etapas do pipeline (para a timeline) ------ */
 export const PIPELINE: { status: number; label: string; descricao: string }[] = [
   { status: StatusDemanda.Rascunho, label: "Draft", descricao: "Requester completing the request." },
   { status: StatusDemanda.Nova, label: "Triage", descricao: "PMO checks whether the request is complete enough." },
-  { status: StatusDemanda.EmAnalise, label: "Evaluation", descricao: "Business, tech and PMO score the criteria; team/hours are defined." },
-  { status: StatusDemanda.EmAprovacao, label: "Approval", descricao: "Sponsor → Tech Lead → Director (DMC) decide." },
-  { status: StatusDemanda.Priorizada, label: "Prioritization", descricao: "PMO positions it in the ranking and releases it for execution." },
+  { status: StatusDemanda.EmAnalise, label: "Evaluation", descricao: "Technical team scores the criteria and defines team/hours; PMO validates urgency." },
+  { status: StatusDemanda.EmAprovacao, label: "Approval", descricao: "Area decisor decides: Infra → Sambini · Apps → Gabriela · AI → AI Decisor." },
+  { status: StatusDemanda.Priorizada, label: "Prioritization", descricao: "PMO positions it in the ranking (score x capacity) and releases it for execution." },
   { status: StatusDemanda.EmExecucao, label: "Execution", descricao: "Project in progress." },
   { status: StatusDemanda.Concluida, label: "Completed", descricao: "Delivered." },
 ];
@@ -77,9 +80,19 @@ export function capacityDefinido(d: Demand): boolean {
   return !!d.time && d.horasEstimadas > 0;
 }
 
-/** Próximo passo de aprovação pendente (sponsor → techlead → diretor). */
+/** Passo de aprovação pendente (gate único do decisor da área). */
 export function proximaAprovacao(d: Demand): AprovacaoStep | undefined {
   return d.aprovacoes.find((a) => a.status === "pendente");
+}
+
+/** Decisor responsável pela demanda (roteado pela classificação). */
+export function decisorDaDemanda(d: Demand): { nome: string; area: string; categoria: Categoria } {
+  const categoria = clasificacionEfetiva(d);
+  return {
+    nome: CATEGORIA_RESPONSAVEL[categoria] === "—" ? "DMC Committee" : CATEGORIA_RESPONSAVEL[categoria],
+    area: CATEGORIA_VIEW_LABEL[categoria],
+    categoria,
+  };
 }
 
 /* ---------------- Definição das ações ---------------------- */
@@ -102,6 +115,8 @@ export interface Acao {
   /** Papéis que podem executar AGORA, dependendo do estado da demanda
       (ex.: em aprovação, só o papel do gate pendente). Sobrepõe `papeis`. */
   papeisDinamicos?: (d: Demand) => Role[];
+  /** Ação restrita ao decisor DA ÁREA da demanda (roteamento por categoria). */
+  restritaAreaDecisor?: boolean;
   /** Cor do botão (Mantine). */
   cor: string;
   /** Se a ação exige um comentário/justificativa. */
@@ -225,11 +240,11 @@ export const ACOES_POR_ESTADO: Record<number, Acao[]> = {
         capacityDefinido(d)
           ? true
           : "Define team & hours (capacity) before sending to approval.",
-      // Reinicia a sequência de gates como PENDENTE ao entrar na aprovação
-      // (garante que sempre há um gate para decidir — sem becos sem saída).
+      // Recria o gate como PENDENTE ao entrar na aprovação, roteado para o
+      // decisor da área da demanda (sem becos sem saída).
       apply: (d) => ({
         status: StatusDemanda.EmAprovacao,
-        aprovacoes: aprovacoesPadrao(d.sponsor),
+        aprovacoes: aprovacoesPadrao(d),
       }),
     },
     {
@@ -243,46 +258,37 @@ export const ACOES_POR_ESTADO: Record<number, Acao[]> = {
     },
   ],
 
-  /* -------- Em aprovação (gates por papel) -------- */
+  /* -------- Em aprovação (gate único do decisor da área) -------- */
   [StatusDemanda.EmAprovacao]: [
     {
       id: "aprovarGate",
-      label: "Approve (my gate)",
-      papeis: [Role.Sponsor, Role.TechLead, Role.Diretor],
-      papeisDinamicos: (d) => {
-        const prox = proximaAprovacao(d);
-        return prox ? [NIVEL_PARA_PAPEL[prox.nivel]] : [];
-      },
+      label: "Approve (area decision)",
+      papeis: [Role.Decisor],
+      restritaAreaDecisor: true,
       cor: "green",
-      campos: ["serviceNow"], // capturado no aceite final (diretor)
+      campos: ["serviceNow"], // capturado no aceite (decisor)
       guarda: (d) => (proximaAprovacao(d) ? true : "No pending gate."),
       apply: (d, ator, ctx) => {
         const aprovacoes = decidirAprovacao(d, "aprovado", ator, ctx.comentario ?? "");
-        const todasAprovadas = aprovacoes.every((a) => a.status === "aprovado");
-        const passoAtual = proximaAprovacao(d); // o que estava pendente antes
-        const eraDiretor = passoAtual?.nivel === "diretor";
-        const changes: Partial<Demand> = { aprovacoes };
-        if (todasAprovadas) {
-          // demanda ACEITA pelo comitê → registra DMC e nº do projeto (ServiceNow)
-          changes.status = StatusDemanda.Priorizada;
-          changes.dmcAprovado = true;
-          changes.dmcData = agora();
-          changes.dmcComentario = eraDiretor ? (ctx.comentario ?? "") : d.dmcComentario;
-          if (ctx.idServiceNow) changes.idServiceNow = ctx.idServiceNow;
-          if (ctx.idProjeto) changes.idProjeto = ctx.idProjeto;
-          if (ctx.rce) changes.rce = ctx.rce;
-        }
+        // Gate único: a decisão do decisor da área ACEITA a demanda (DMC)
+        const changes: Partial<Demand> = {
+          aprovacoes,
+          status: StatusDemanda.Priorizada,
+          dmcAprovado: true,
+          dmcData: agora(),
+          dmcComentario: ctx.comentario ?? "",
+        };
+        if (ctx.idServiceNow) changes.idServiceNow = ctx.idServiceNow;
+        if (ctx.idProjeto) changes.idProjeto = ctx.idProjeto;
+        if (ctx.rce) changes.rce = ctx.rce;
         return changes;
       },
     },
     {
       id: "recusarGate",
-      label: "Reject (my gate)",
-      papeis: [Role.Sponsor, Role.TechLead, Role.Diretor],
-      papeisDinamicos: (d) => {
-        const prox = proximaAprovacao(d);
-        return prox ? [NIVEL_PARA_PAPEL[prox.nivel]] : [];
-      },
+      label: "Reject (area decision)",
+      papeis: [Role.Decisor],
+      restritaAreaDecisor: true,
       cor: "red",
       exigeComentario: true,
       guarda: (d) => (proximaAprovacao(d) ? true : "No pending gate."),
@@ -352,16 +358,24 @@ export function papeisDaAcao(acao: Acao, d: Demand): Role[] {
   return acao.papeisDinamicos ? acao.papeisDinamicos(d) : acao.papeis;
 }
 
-/** Ações que o usuário (com `papeis`) pode acionar no estado atual da demanda. */
-export function proximasAcoes(d: Demand, papeis: Role[]): Acao[] {
-  return acoesDoEstado(d.status).filter((a) =>
-    papeisDaAcao(a, d).some((p) => papeis.includes(p)),
-  );
+/** Ações que o usuário (com `papeis` e, para Decisores, `decisorDe`) pode
+    acionar no estado atual. Ações `restritaAreaDecisor` só aparecem para o
+    decisor da frente da demanda (Admin ignora a restrição). */
+export function proximasAcoes(d: Demand, papeis: Role[], decisorDe?: Categoria[]): Acao[] {
+  return acoesDoEstado(d.status).filter((a) => {
+    if (!papeisDaAcao(a, d).some((p) => papeis.includes(p))) return false;
+    if (a.restritaAreaDecisor && !papeis.includes(Role.Admin) && decisorDe !== undefined) {
+      const cat = clasificacionEfetiva(d);
+      // "otro" não tem decisor dedicado → qualquer decisor pode atuar
+      if (cat !== "otro" && !decisorDe.includes(cat)) return false;
+    }
+    return true;
+  });
 }
 
-/** Verdadeiro se ALGUMA ação do estado atual está liberada para esses papéis. */
-export function precisaDeMim(d: Demand, papeis: Role[]): boolean {
-  return proximasAcoes(d, papeis).some((a) => a.guarda(d) === true);
+/** Verdadeiro se ALGUMA ação do estado atual está liberada para o usuário. */
+export function precisaDeMim(d: Demand, papeis: Role[], decisorDe?: Categoria[]): boolean {
+  return proximasAcoes(d, papeis, decisorDe).some((a) => a.guarda(d) === true);
 }
 
 /** Texto curto do que a demanda aguarda agora (para listas/cards). */
@@ -374,7 +388,7 @@ export function aguardando(d: Demand): string {
   }
   if (d.status === StatusDemanda.EmAprovacao) {
     const prox = proximaAprovacao(d);
-    if (prox) return `Waiting on ${ROLE_LABEL[NIVEL_PARA_PAPEL[prox.nivel]]}`;
+    if (prox) return `Waiting on ${prox.responsavel}`;
   }
   const papeis = new Set(acoes.flatMap((a) => a.papeis));
   return `Waiting on ${[...papeis].map((p) => ROLE_LABEL[p]).join(" / ")}`;
