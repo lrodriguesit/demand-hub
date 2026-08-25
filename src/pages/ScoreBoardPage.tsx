@@ -43,12 +43,8 @@ import { useT } from "../i18n";
 
 const SCORE_COLS: { key: keyof Score; short: string }[] = [
   { key: "businessImpact", short: "Impact" },
-  { key: "riskOfNoExecution", short: "Risk" },
-  { key: "technicalChallenge", short: "Tech" },
-  { key: "revenuePotential", short: "Revenue" },
-  { key: "strategicFit", short: "Strategic" },
-  { key: "stakeholder", short: "Stkh" },
-  { key: "urgency", short: "Urg" },
+  { key: "urgency", short: "Urgency" },
+  { key: "returnValue", short: "Return" },
 ];
 
 function priorityColor(p: number | null | undefined): string {

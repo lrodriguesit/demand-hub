@@ -5,7 +5,6 @@
    avaliação e 1 em triagem.
    ============================================================ */
 import {
-  ABRANGENCIA_SCORE,
   AUTO_AVALIADOR,
   ImpactoAbrangencia,
   Impacto,
@@ -14,9 +13,8 @@ import {
   TipoImpacto,
   Urgencia,
   aprovacoesPadrao,
-  emptyScore,
+  scoreAutomatico,
   type Demand,
-  type Score,
 } from "./types";
 
 const dia = (offset: number) => {
@@ -25,13 +23,8 @@ const dia = (offset: number) => {
   return d.toISOString();
 };
 
-interface SeedExtra {
-  score?: Partial<Score>;
-}
-
-function base(n: number, extra: Partial<Demand>, opts: SeedExtra = {}): Demand {
+function base(n: number, extra: Partial<Demand>): Demand {
   const abr = extra.impactoAbrangencia ?? ImpactoAbrangencia.Processo;
-  const score: Score = { ...emptyScore(), businessImpact: ABRANGENCIA_SCORE[abr] ?? 3, ...opts.score };
   const criadoEm = extra.dataSolicitacao ?? dia(-10);
   const d: Demand = {
     id: `seed-${n}`,
@@ -68,7 +61,7 @@ function base(n: number, extra: Partial<Demand>, opts: SeedExtra = {}): Demand {
     esforcoEstimado: null,
     anexos: [],
     status: StatusDemanda.Nova,
-    score,
+    score: { businessImpact: 1, urgency: 1, returnValue: 1 },
     scoreFlags: [],
     projectStage: "Discovery",
     finalPriority: null,
@@ -97,6 +90,8 @@ function base(n: number, extra: Partial<Demand>, opts: SeedExtra = {}): Demand {
     modificadoEm: criadoEm,
     ...extra,
   };
+  // As 3 notas saem automaticamente dos campos do intake (modelo simplificado)
+  d.score = scoreAutomatico(d);
   // Gate coerente com a classificação, se não veio pronto no extra
   if (!d.aprovacoes.length) d.aprovacoes = aprovacoesPadrao(d);
   return d;
@@ -152,7 +147,6 @@ export function seedDemands(): Demand[] {
         idServiceNow: "RITM0045821",
         rce: "RCE-2026-118",
       },
-      { score: { riskOfNoExecution: 5, technicalChallenge: 4, strategicFit: 4, urgency: 4 } },
     ),
 
     /* 2 — APPS · aprovada por Gabriela · priorizada */
@@ -196,7 +190,6 @@ export function seedDemands(): Demand[] {
         idServiceNow: "RITM0046102",
         rce: "RCE-2026-131",
       },
-      { score: { revenuePotential: 4, strategicFit: 4, stakeholder: 4 } },
     ),
 
     /* 3 — AI · em aprovação (aguardando o AI Decisor) */
@@ -228,7 +221,6 @@ export function seedDemands(): Demand[] {
         abbottProjectType: "Phase 0",
         aprovacoes: aprovacoesPadrao({ tipo: TipoDemanda.Automacao, clasificacion: "ia" }),
       },
-      { score: { revenuePotential: 4, technicalChallenge: 4, strategicFit: 5 } },
     ),
 
     /* 4 — APPS · em avaliação (Time Técnico define capacity) */
@@ -253,7 +245,6 @@ export function seedDemands(): Demand[] {
         sponsor: "Juliana Costa",
         status: StatusDemanda.EmAnalise,
       },
-      { score: { urgency: 4, stakeholder: 4 } },
     ),
 
     /* 5 — INFRA · em triagem (PMO) */

@@ -58,9 +58,9 @@ export function pipelineIndex(status: number): number {
 export function avaliacaoCobertura(d: Demand) {
   const validados = new Set(d.avaliacoes.map((a) => a.criterio));
   const total = (Object.keys(CRITERIO_CATEGORIA) as (keyof Score)[]).length;
-  const porCategoria = { negocio: false, tecnico: false, pmo: false };
+  const porCategoria = { negocio: false, pmo: false };
   // categoria coberta = TODOS os critérios dela validados
-  const cats: Array<"negocio" | "tecnico" | "pmo"> = ["negocio", "tecnico", "pmo"];
+  const cats: Array<"negocio" | "pmo"> = ["negocio", "pmo"];
   for (const cat of cats) {
     const criteriosDaCat = (Object.keys(CRITERIO_CATEGORIA) as (keyof Score)[]).filter(
       (c) => CRITERIO_CATEGORIA[c] === cat,

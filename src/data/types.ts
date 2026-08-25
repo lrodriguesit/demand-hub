@@ -194,69 +194,109 @@ export function clasificacionEfetiva(d: { clasificacion?: string; tipo: number }
 export const ESFUERZO_TRIGGER_NOTA =
   "Effort (hours/FTE) is counted from the technical evaluation (Phase 0), set by the technical team.";
 
-/* ---------------- Score (priorização) ----------------------- */
-/* Cada critério recebe nota 1..5; ponderação fixa abaixo soma 100%. */
+/* ---------------- Score (priorização) -----------------------
+   MODELO SIMPLIFICADO (3 critérios, pesos redondos).
+
+   Objetivo do score: ordenar a fila para decidir O QUE FAZER PRIMEIRO.
+   Ele mede VALOR para o negócio. O ESFORÇO (horas/time) NÃO entra no
+   score — é o outro lado da conta, tratado em Capacity pelo PMO.
+
+   As três notas são DERIVADAS automaticamente do que o solicitante já
+   informou no intake (ver scoreAutomatico). PMO/Time Técnico podem
+   ajustar manualmente, mas ninguém precisa "saber pontuar".        */
 
 export interface Score {
-  businessImpact: number;       // 25%
-  riskOfNoExecution: number;    // 15%
-  technicalChallenge: number;   // 10%
-  revenuePotential: number;     // 20%
-  strategicFit: number;         // 15%
-  stakeholder: number;          // 10%
-  urgency: number;              // 5%
+  businessImpact: number; // 50% — até onde a demanda impacta
+  urgency: number;        // 30% — urgência / risco de não fazer
+  returnValue: number;    // 20% — retorno econômico esperado
 }
 
 export const SCORE_WEIGHTS: Score = {
-  businessImpact: 0.25,
-  riskOfNoExecution: 0.15,
-  technicalChallenge: 0.1,
-  revenuePotential: 0.2,
-  strategicFit: 0.15,
-  stakeholder: 0.1,
-  urgency: 0.05,
+  businessImpact: 0.5,
+  urgency: 0.3,
+  returnValue: 0.2,
 };
 
 export const SCORE_LABELS: Record<keyof Score, string> = {
-  businessImpact: "Impacto no Negócio",
-  riskOfNoExecution: "Risco de Não Executar",
-  technicalChallenge: "Complexidade Técnica",
-  revenuePotential: "Potencial de Receita",
-  strategicFit: "Alinhamento Estratégico",
-  stakeholder: "Pressão de Stakeholders",
-  urgency: "Urgência (legal/fiscal/compliance)",
+  businessImpact: "Business impact",
+  urgency: "Urgency & risk",
+  returnValue: "Expected return",
+};
+
+/** Explicação em uma linha — mostrada ao lado de cada critério. */
+export const SCORE_HELP: Record<keyof Score, string> = {
+  businessImpact: "How far the request reaches: one user, a process, a department or the IT backbone.",
+  urgency: "Deadline pressure, legal/compliance exposure and the consequence of not doing it.",
+  returnValue: "Expected economic benefit (savings or revenue) declared by the requester.",
+};
+
+/** De onde a nota vem automaticamente (rastreabilidade na tela). */
+export const SCORE_ORIGEM: Record<keyof Score, string> = {
+  businessImpact: "Impact scope",
+  urgency: "Urgency",
+  returnValue: "Expected benefit",
 };
 
 /** Quem é responsável por validar cada critério */
-export type CategoriaAvaliacao = "negocio" | "tecnico" | "pmo";
+export type CategoriaAvaliacao = "negocio" | "pmo";
 
 export const CRITERIO_CATEGORIA: Record<keyof Score, CategoriaAvaliacao> = {
   businessImpact: "negocio",
-  revenuePotential: "negocio",
-  strategicFit: "negocio",
-  stakeholder: "negocio",
-  riskOfNoExecution: "tecnico",
-  technicalChallenge: "tecnico",
+  returnValue: "negocio",
   urgency: "pmo",
 };
 
 export const CATEGORIA_LABEL: Record<CategoriaAvaliacao, string> = {
-  negocio: "Avaliação de Negócio",
-  tecnico: "Avaliação Técnica",
-  pmo: "Avaliação PMO",
+  negocio: "Business",
+  pmo: "PMO",
 };
 
 export const CATEGORIA_DESCRICAO: Record<CategoriaAvaliacao, string> = {
-  negocio: "Validated by the PMO with the requester/sponsor input",
-  tecnico: "Validated by the Technical Team (evaluators)",
-  pmo: "Validated by the PMO (urgency/compliance)",
+  negocio: "Value for the business — comes from the intake form",
+  pmo: "Urgency and compliance — validated by the PMO",
 };
 
 export const CATEGORIA_COR: Record<CategoriaAvaliacao, string> = {
   negocio: "blue",
-  tecnico: "violet",
   pmo: "teal",
 };
+
+/* --------- Derivação automática das três notas --------------- */
+
+/** Urgência informada → nota 1..5 do critério de urgência. */
+export const URGENCIA_SCORE: Record<number, number> = {
+  [Urgencia.Critico]: 5,
+  [Urgencia.Alto]: 4,
+  [Urgencia.Medio]: 3,
+  [Urgencia.Baixo]: 2,
+};
+
+/** Faixas do benefício econômico esperado → nota 1..5. */
+export const FAIXAS_RETORNO: { ate: number; nota: number; label: string }[] = [
+  { ate: 1, nota: 1, label: "Not declared" },
+  { ate: 50_000, nota: 2, label: "< US$ 50k" },
+  { ate: 200_000, nota: 3, label: "US$ 50k – 200k" },
+  { ate: 500_000, nota: 4, label: "US$ 200k – 500k" },
+  { ate: Number.POSITIVE_INFINITY, nota: 5, label: "≥ US$ 500k" },
+];
+
+export function retornoScore(valorEstimado: number | null | undefined): number {
+  const v = valorEstimado ?? 0;
+  return FAIXAS_RETORNO.find((f) => v < f.ate)?.nota ?? 5;
+}
+
+/** Calcula as 3 notas a partir dos campos do intake (sem pedir nada a mais). */
+export function scoreAutomatico(d: {
+  impactoAbrangencia?: number;
+  urgencia: number;
+  valorEstimado: number | null;
+}): Score {
+  return {
+    businessImpact: ABRANGENCIA_SCORE[d.impactoAbrangencia ?? 0] ?? 2,
+    urgency: URGENCIA_SCORE[d.urgencia] ?? 3,
+    returnValue: retornoScore(d.valorEstimado),
+  };
+}
 
 export interface AvaliacaoCriterio {
   criterio: keyof Score;
@@ -470,39 +510,22 @@ export function aprovacoesPadrao(d: { clasificacion?: string; tipo: number }): A
 }
 
 export function emptyScore(): Score {
-  return {
-    businessImpact: 1,
-    riskOfNoExecution: 1,
-    technicalChallenge: 1,
-    revenuePotential: 1,
-    strategicFit: 1,
-    stakeholder: 1,
-    urgency: 1,
-  };
+  return { businessImpact: 1, urgency: 1, returnValue: 1 };
 }
 
 export function rawScoreSum(s: Score): number {
-  return (
-    s.businessImpact +
-    s.riskOfNoExecution +
-    s.technicalChallenge +
-    s.revenuePotential +
-    s.strategicFit +
-    s.stakeholder +
-    s.urgency
+  return (Object.keys(SCORE_WEIGHTS) as (keyof Score)[]).reduce(
+    (acc, k) => acc + (Number(s?.[k]) || 0),
+    0,
   );
 }
 
 /** Score ponderado: cada critério multiplicado pelo seu peso (resultado 1..5). */
 export function weightedScore(s: Score): number {
-  const total =
-    s.businessImpact * SCORE_WEIGHTS.businessImpact +
-    s.riskOfNoExecution * SCORE_WEIGHTS.riskOfNoExecution +
-    s.technicalChallenge * SCORE_WEIGHTS.technicalChallenge +
-    s.revenuePotential * SCORE_WEIGHTS.revenuePotential +
-    s.strategicFit * SCORE_WEIGHTS.strategicFit +
-    s.stakeholder * SCORE_WEIGHTS.stakeholder +
-    s.urgency * SCORE_WEIGHTS.urgency;
+  const total = (Object.keys(SCORE_WEIGHTS) as (keyof Score)[]).reduce(
+    (acc, k) => acc + (Number(s?.[k]) || 0) * SCORE_WEIGHTS[k],
+    0,
+  );
   return Math.round(total * 100) / 100;
 }
 

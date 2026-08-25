@@ -62,14 +62,13 @@ function score(
   st: number,
   u: number,
 ): Score {
+  /* Modelo novo tem 3 critérios; os parâmetros extras do mock viram
+     média (risco/estratégico → urgência; receita/stakeholder → retorno). */
+  void t;
   return {
     businessImpact: b,
-    riskOfNoExecution: r,
-    technicalChallenge: t,
-    revenuePotential: rev,
-    strategicFit: sf,
-    stakeholder: st,
-    urgency: u,
+    urgency: Math.round((u + r + sf) / 3),
+    returnValue: Math.round((rev + st) / 2),
   };
 }
 

@@ -42,9 +42,10 @@ import {
   Urgencia,
   abrangenciaOptions,
   appName,
+  scoreAutomatico,
+  weightedScore,
   categoryOptions,
   clasificacionOptions,
-  esforcoOptions,
   impactoOptions,
   stakeholderDaArea,
   tipoImpactoOptions,
@@ -559,22 +560,6 @@ export function NovaDemandaPage() {
               />
             </SimpleGrid>
 
-            <SectionTitle index={9} title={t("nova_section9")} />
-            <Alert color="gray" variant="light" mb="xs">
-              <Text size="sm">
-                Effort, team and hours (capacity) are defined by the technical team in the
-                Evaluation stage. It's optional here — fill it in only if you have an idea.
-              </Text>
-            </Alert>
-            <Select
-              label={t("nova_effort")}
-              description="Optional — requester's estimate"
-              clearable
-              maw={340}
-              data={esforcoOptions.map((o) => ({ value: String(o.value), label: L.esforco[o.value] }))}
-              value={form.esforcoEstimado != null ? String(form.esforcoEstimado) : null}
-              onChange={(v) => set("esforcoEstimado", v ? Number(v) : null)}
-            />
           </Stack>
         )}
 
@@ -584,8 +569,9 @@ export function NovaDemandaPage() {
             <SectionTitle index={6} title={t("nova_section6")} />
             <Alert color="gray" variant="light">
               <Text size="sm">
-                This section is optional. If you don't know the technical details,
-                leave it blank — the technical team completes it during the Evaluation.
+                Just point the applications you believe are affected. Integrations,
+                requirements, APP ID and the proposed solution are completed by the
+                technical team during the Evaluation.
               </Text>
             </Alert>
             <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md">
@@ -600,52 +586,7 @@ export function NovaDemandaPage() {
                 value={form.sistemasEnvolvidos ? form.sistemasEnvolvidos.split("; ").filter((x) => APP_REGISTRY[x]) : []}
                 onChange={(v) => set("sistemasEnvolvidos", v.join("; "))}
               />
-              <Textarea
-                label={t("nova_integrations_label")}
-                autosize
-                minRows={2}
-                value={form.integracoesNecessarias}
-                onChange={(e) => set("integracoesNecessarias", e.currentTarget.value)}
-              />
-              <Textarea
-                label={t("nova_reqs_label")}
-                autosize
-                minRows={2}
-                value={form.requisitosPrincipais}
-                onChange={(e) => set("requisitosPrincipais", e.currentTarget.value)}
-              />
-              <div>
-                <Checkbox
-                  label="Is there already a proposed solution?"
-                  checked={form.temSolucaoProposta}
-                  onChange={(e) => set("temSolucaoProposta", e.currentTarget.checked)}
-                />
-                {form.temSolucaoProposta && (
-                  <Textarea
-                    mt="xs"
-                    label={t("nova_solution_label")}
-                    autosize
-                    minRows={2}
-                    placeholder="Describe the proposed solution..."
-                    value={form.solucaoProposta}
-                    onChange={(e) => set("solucaoProposta", e.currentTarget.value)}
-                  />
-                )}
-              </div>
             </SimpleGrid>
-
-            <TextInput
-              label="APP ID (application code)"
-              description={
-                appName(form.appId)
-                  ? `Application: ${appName(form.appId)}`
-                  : "For system demands — the name appears automatically (e.g.: APP-0456)"
-              }
-              placeholder="e.g.: APP-0456"
-              maw={360}
-              value={form.appId}
-              onChange={(e) => set("appId", e.currentTarget.value)}
-            />
 
             <SectionTitle index={7} title={t("nova_section7")} />
             <SimpleGrid cols={{ base: 1, sm: 3 }} spacing="md">
@@ -722,12 +663,15 @@ export function NovaDemandaPage() {
                   <Resumo k="Value" v={typeof form.valorEstimado === "number" ? (VALUE_RANGES.find((r) => r.value === form.valorEstimado)?.label ?? `US$ ${form.valorEstimado.toLocaleString()}`) : "—"} />
                   <Resumo k="ROI" v={typeof form.roiEstimado === "number" ? `${form.roiEstimado}%` : "—"} />
                   <Resumo k="RCE" v={form.rce || "—"} />
+                  <Resumo
+                    k="Priority score (auto)"
+                    v={`${weightedScore(scoreAutomatico({ impactoAbrangencia: form.impactoAbrangencia, urgencia: form.urgencia, valorEstimado: typeof form.valorEstimado === "number" ? form.valorEstimado : null })).toFixed(2)} / 5.00`}
+                  />
                 </SummarySection>
                 <SummarySection title="CLASSIFICATION" onEdit={() => setStep(1)}>
                   <Resumo k="Type" v={L.tipo[form.tipo]} />
                   <Resumo k="Category" v={categoryOptions.find((o) => o.value === form.category)?.label ?? "—"} />
                   <Resumo k="Project classification" v={form.clasificacion === "otro" ? (form.clasificacionOtro || "Other") : (clasificacionOptions.find((o) => o.value === form.clasificacion)?.label ?? "—")} />
-                  <Resumo k="APP ID" v={form.appId ? `${form.appId}${appName(form.appId) ? ` — ${appName(form.appId)}` : ""}` : "—"} />
                 </SummarySection>
                 <SummarySection title="STAKEHOLDERS" onEdit={() => setStep(3)}>
                   <Resumo k="Process owner" v={form.donoProcesso || "—"} />

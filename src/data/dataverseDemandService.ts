@@ -116,20 +116,15 @@ function csvToFlagArr(s: string | null | undefined): ScoreFlag[] {
 /** Dataverse -> modelo de domínio. */
 function fromDv(r: Ardx_demandas): Demand {
   const score = emptyScore();
+  /* Modelo de 3 critérios sobre as colunas existentes do Dataverse:
+     impacto → scorebusinessimpact · urgência → scoreurgency ·
+     retorno → scorerevenue. As colunas legadas (risk/technical/
+     strategic/stakeholder) continuam na tabela, mas não são mais usadas. */
   const baseScore = {
     businessImpact:
       (r.ardx_scorebusinessimpact as number | undefined) ?? score.businessImpact,
-    riskOfNoExecution:
-      (r.ardx_scorerisk as number | undefined) ?? score.riskOfNoExecution,
-    technicalChallenge:
-      (r.ardx_scoretechnical as number | undefined) ?? score.technicalChallenge,
-    revenuePotential:
-      (r.ardx_scorerevenue as number | undefined) ?? score.revenuePotential,
-    strategicFit:
-      (r.ardx_scorestrategic as number | undefined) ?? score.strategicFit,
-    stakeholder:
-      (r.ardx_scorestakeholder as number | undefined) ?? score.stakeholder,
     urgency: (r.ardx_scoreurgency as number | undefined) ?? score.urgency,
+    returnValue: (r.ardx_scorerevenue as number | undefined) ?? score.returnValue,
   };
 
   return {
@@ -248,12 +243,8 @@ function toDv(input: Partial<Demand>): Record<string, unknown> {
     r.ardx_finalpriority = input.finalPriority;
   if (input.score) {
     r.ardx_scorebusinessimpact = input.score.businessImpact;
-    r.ardx_scorerisk = input.score.riskOfNoExecution;
-    r.ardx_scoretechnical = input.score.technicalChallenge;
-    r.ardx_scorerevenue = input.score.revenuePotential;
-    r.ardx_scorestrategic = input.score.strategicFit;
-    r.ardx_scorestakeholder = input.score.stakeholder;
     r.ardx_scoreurgency = input.score.urgency;
+    r.ardx_scorerevenue = input.score.returnValue;
   }
   if (input.scoreFlags !== undefined)
     r.ardx_scoreflags = input.scoreFlags.join(",");

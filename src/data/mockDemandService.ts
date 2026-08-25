@@ -4,8 +4,7 @@
    ============================================================ */
 import {
   aprovacoesPadrao,
-  emptyScore,
-  ABRANGENCIA_SCORE,
+  scoreAutomatico,
   AUTO_AVALIADOR,
   StatusDemanda,
   type Demand,
@@ -15,9 +14,9 @@ import {
 } from "./types";
 import { seedDemands } from "./seedDemands";
 
-// v3: semeia 5 demandas demo (2 aprovadas; Infra/AI/Apps) na primeira carga.
+// v4: semeia 5 demandas demo (score de 3 critérios) (2 aprovadas; Infra/AI/Apps) na primeira carga.
 // A troca de versão da chave também descarta estados antigos do fluxo de 3 gates.
-const LS_KEY_DEMANDS = "demand-system.demands.v3";
+const LS_KEY_DEMANDS = "demand-system.demands.v4";
 
 function loadDemands(): Demand[] {
   try {
@@ -62,20 +61,18 @@ export const mockDemandService: DemandService = {
   },
   async create(input: DemandInput) {
     const now = new Date().toISOString();
-    // Score de "Impacto no Negócio" calculado automaticamente pela abrangência
-    // escolhida pelo solicitante — e já validado (não exige avaliador manual).
-    const score = emptyScore();
-    const avaliacoes: AvaliacaoCriterio[] = [];
-    const abr = input.impactoAbrangencia;
-    if (abr && ABRANGENCIA_SCORE[abr]) {
-      score.businessImpact = ABRANGENCIA_SCORE[abr];
-      avaliacoes.push({
-        criterio: "businessImpact",
-        validadoPor: AUTO_AVALIADOR,
-        validadoEm: now,
-        comentario: "Automatically calculated from the impact level informed at intake.",
-      });
-    }
+    // As 3 notas do score saem AUTOMATICAMENTE do que o solicitante
+    // respondeu (alcance, urgência e benefício esperado) — ninguém precisa
+    // saber pontuar. PMO/Time Técnico podem ajustar depois na Avaliação.
+    const score = scoreAutomatico(input);
+    const avaliacoes: AvaliacaoCriterio[] = (
+      Object.keys(score) as (keyof typeof score)[]
+    ).map((criterio) => ({
+      criterio,
+      validadoPor: AUTO_AVALIADOR,
+      validadoEm: now,
+      comentario: "Calculated automatically from the intake answers.",
+    }));
     const novo: Demand = {
       ...input,
       id: uid("dem"),
